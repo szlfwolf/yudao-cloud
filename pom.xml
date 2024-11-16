@@ -66,6 +66,10 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven-surefire-plugin.version}</version>
+                    <configuration>
+                    <!--解决测试时中文乱码问题-->
+                        <argLine>-Dfile.encoding=UTF-8</argLine>
+                    </configuration>
                 </plugin>
                 <!-- maven-compiler-plugin 插件，解决 Lombok + MapStruct 组合 -->
                 <!-- https://stackoverflow.com/questions/33483697/re-run-spring-boot-configuration-annotation-processor-to-update-generated-metada -->

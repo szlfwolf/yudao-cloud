@@ -117,6 +117,7 @@ CREATE TABLE IF NOT EXISTS `pay_notify_task` (
     `type`               tinyint(4)    NOT NULL,
     `data_id`           bigint(20)    NOT NULL,
     `merchant_order_id`           varchar(64)    NOT NULL,
+    `merchant_transfer_id` varchar(64) NULL DEFAULT NULL,
     `status`             tinyint(4)    NOT NULL,
     `next_notify_time`       datetime(0)   NULL     DEFAULT NULL,
     `last_execute_time`       datetime(0)   NULL     DEFAULT NULL,
