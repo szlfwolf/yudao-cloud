@@ -11,8 +11,8 @@ import cn.iocoder.yudao.framework.security.core.LoginUser;
 import cn.iocoder.yudao.framework.security.core.util.SecurityFrameworkUtils;
 import cn.iocoder.yudao.framework.web.core.handler.GlobalExceptionHandler;
 import cn.iocoder.yudao.framework.web.core.util.WebFrameworkUtils;
-import cn.iocoder.yudao.module.system.api.oauth2.OAuth2TokenApi;
-import cn.iocoder.yudao.module.system.api.oauth2.dto.OAuth2AccessTokenCheckRespDTO;
+import cn.iocoder.yudao.framework.common.biz.system.oauth2.OAuth2TokenCommonApi;
+import cn.iocoder.yudao.framework.common.biz.system.oauth2.dto.OAuth2AccessTokenCheckRespDTO;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -40,7 +40,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
     private final GlobalExceptionHandler globalExceptionHandler;
 
-    private final OAuth2TokenApi oauth2TokenApi;
+    private final OAuth2TokenCommonApi oauth2TokenApi;
 
     @Override
     @SuppressWarnings("NullableProblems")
@@ -135,7 +135,17 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
         }
         try {
             loginUserStr = URLDecoder.decode(loginUserStr, StandardCharsets.UTF_8); // 解码，解决中文乱码问题
-            return JsonUtils.parseObject(loginUserStr, LoginUser.class);
+            LoginUser loginUser = JsonUtils.parseObject(loginUserStr, LoginUser.class);
+            // 用户类型不匹配，无权限
+            // 注意：只有 /admin-api/* 和 /app-api/* 有 userType，才需要比对用户类型
+            // 类似 WebSocket 的 /ws/* 连接地址，是不需要比对用户类型的
+            Integer userType = WebFrameworkUtils.getLoginUserType(request);
+            if (userType != null
+                    && loginUser != null
+                    && ObjectUtil.notEqual(loginUser.getUserType(), userType)) {
+                throw new AccessDeniedException("错误的用户类型");
+            }
+            return loginUser;
         } catch (Exception ex) {
             log.error("[buildLoginUserByHeader][解析 LoginUser({}) 发生异常]", loginUserStr, ex);  ;
             throw ex;

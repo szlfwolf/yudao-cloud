@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.bpm.enums.task;
 
-import cn.iocoder.yudao.framework.common.core.IntArrayValuable;
+import cn.hutool.core.util.ArrayUtil;
+import cn.iocoder.yudao.framework.common.core.ArrayValuable;
 import cn.iocoder.yudao.framework.common.util.object.ObjectUtils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,7 +15,7 @@ import java.util.Arrays;
  */
 @Getter
 @AllArgsConstructor
-public enum BpmProcessInstanceStatusEnum implements IntArrayValuable {
+public enum BpmProcessInstanceStatusEnum implements ArrayValuable<Integer> {
 
     NOT_START(-1, "未开始"),
     RUNNING(1, "审批中"),
@@ -22,7 +23,7 @@ public enum BpmProcessInstanceStatusEnum implements IntArrayValuable {
     REJECT(3, "审批不通过"),
     CANCEL(4, "已取消");
 
-    public static final int[] ARRAYS = Arrays.stream(values()).mapToInt(BpmProcessInstanceStatusEnum::getStatus).toArray();
+    public static final Integer[] ARRAYS = Arrays.stream(values()).map(BpmProcessInstanceStatusEnum::getStatus).toArray(Integer[]::new);
 
     /**
      * 状态
@@ -34,13 +35,21 @@ public enum BpmProcessInstanceStatusEnum implements IntArrayValuable {
     private final String desc;
 
     @Override
-    public int[] array() {
+    public Integer[] array() {
         return ARRAYS;
+    }
+
+    public static boolean isRejectStatus(Integer status) {
+        return REJECT.getStatus().equals(status);
     }
 
     public static boolean isProcessEndStatus(Integer status) {
         return ObjectUtils.equalsAny(status,
                 APPROVE.getStatus(), REJECT.getStatus(), CANCEL.getStatus());
+    }
+
+    public static BpmProcessInstanceStatusEnum valueOf(Integer status) {
+        return ArrayUtil.firstMatch(item -> item.getStatus().equals(status), values());
     }
 
 }
